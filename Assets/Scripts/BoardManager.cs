@@ -28,12 +28,14 @@ namespace Completed
         public int rows = 8;
         public Count wallCount = new Count(5, 9);
         public Count foodCount = new Count(1, 5);
+        public GameObject[] toolTiles;
         public GameObject exit;       
         public GameObject[] floorTiles;  
         public GameObject[] wallTiles; 
         public GameObject[] foodTiles; 
         public GameObject[] enemyTiles; 
-        public GameObject[] outerWallTiles; 
+        public GameObject[] outerWallTiles;
+        public GameObject[] wallSideTiles;
 
         private Transform boardHolder;
         private List<Vector3> gridPositions = new List<Vector3>();
@@ -62,10 +64,26 @@ namespace Completed
                     GameObject toInstantiate = floorTiles[Random.Range(0, floorTiles.Length)];
                     if (x == -1 || x == columns || y == -1 || y == rows)
                     {
-                        toInstantiate = outerWallTiles[Random.Range(0, outerWallTiles.Length)];
+                        if (y == -1) toInstantiate = outerWallTiles[3];
+                        else if (y == rows) toInstantiate = outerWallTiles[2];
+                        else if (x == -1) toInstantiate = outerWallTiles[0];
+                        else toInstantiate = outerWallTiles[1];
                     }
                     GameObject instance = Instantiate(toInstantiate, new Vector3(x, y, 0f), Quaternion.identity) as GameObject;
+                    if ( x == -1 &&  (y== -1 || y == columns))
+                    {
+                        GameObject toSide = wallSideTiles[1];
+                        GameObject side = Instantiate(toSide, new Vector3(x, y, 0f), Quaternion.identity);
+                        //side.transform.SetParent(boardHolder);
+                    }
+                    else if (x == columns && (y == -1 || y == columns))
+                    {
+                        GameObject toSide = wallSideTiles[0];
+                        GameObject side = Instantiate(toSide, new Vector3(x, y, 0f), Quaternion.identity);
+                        //side.transform.SetParent(boardHolder);
+                    }
                     instance.transform.SetParent(boardHolder); //??
+
                 }
             }
         }
@@ -100,6 +118,11 @@ namespace Completed
             int enemyCount = (int)Mathf.Log(level, 2f);
 
             LayoutObjectAtRandom(enemyTiles, enemyCount, enemyCount);
+            int num = Random.Range(1, 5);
+            if(num == 1)
+            {
+                LayoutObjectAtRandom(toolTiles, 1, 1);
+            }
             Instantiate(exit, new Vector3(columns - 1, rows - 1, 0f), Quaternion.identity);
         }
     }

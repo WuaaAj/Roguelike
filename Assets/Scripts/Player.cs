@@ -22,6 +22,7 @@ public class Player : MovingObject
     private Animator animator;
     private int food;
     private Vector2 touchOrigin = -Vector2.one;
+    private int protect;
 
     // Start is called before the first frame update
     protected override void Start()
@@ -29,14 +30,16 @@ public class Player : MovingObject
         animator = GetComponent<Animator>();
 
         food = GameManager.instance.playerFoodPoints;
+        protect = GameManager.instance.playerProtectPoints;
 
-        foodText.text = "Food: " + food;
+        foodText.text = "Food: " + food + "  Protect: " + protect;
         base.Start();
     }
 
     private void OnDisable()
     {
         GameManager.instance.playerFoodPoints = food;
+        GameManager.instance.playerProtectPoints = protect;
     }
 
     // Update is called once per frame
@@ -112,6 +115,13 @@ public class Player : MovingObject
             SoundManager.instance.RandomizeSfx(drinkSound1, drinkSound2);
             other.gameObject.SetActive(false);
         }
+        else if (other.tag == "Tool")
+        {
+            protect += 3;
+            foodText.text = "+3 Protect: " + protect;
+            other.gameObject.SetActive(false);
+            SoundManager.instance.RandomizeSfx(eatSound1, eatSound2);
+        }
     }
 
     private void Restart()
@@ -121,16 +131,25 @@ public class Player : MovingObject
 
     public void LoseFood(int loss)
     {
-        animator.SetTrigger("playerHit");
-        food -= loss;
-        foodText.text = "-" + loss + "Food: " + food;
-        CheckIfGameOver();
+        if (protect == 0)
+        {
+            animator.SetTrigger("playerHit");
+            food -= loss;
+            foodText.text = "-" + loss + "Food: " + food;
+            CheckIfGameOver();
+        }
+        else
+        {
+            animator.SetTrigger("playerHit");
+            protect -= 1;
+            foodText.text = "-1" + " Protect: " + protect;
+        }
     }
 
     protected override void AttemptMove <T> (int xDir,int yDir)
     {
         food--;
-        foodText.text = "Food: " + food;
+        foodText.text = "Food: " + food + " Protect: " + protect;
 
         base.AttemptMove<T>(xDir, yDir);
 
